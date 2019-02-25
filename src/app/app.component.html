@@ -1,0 +1,114 @@
+<nz-layout>
+    <nz-header>Header</nz-header>
+    <nz-content>
+        <nz-card>
+            <nz-card nzTitle="操作" class="opretion_card">
+                <div nz-row nzType="flex" nzJustify="end">
+                    <div nz-col>
+                        <nz-button-group (click)="preview()">
+                            <button nz-button nzType="default"><i nz-icon [type]=" showType ? 'eye' : 'stop'"></i>
+                                {{showType ? "预览" : "取消预览"}}</button>
+                        </nz-button-group>
+                    </div>
+                </div>
+            </nz-card>
+            <nz-card nzTitle="报价单" class="table_card" [nzExtra]="extraTemplate">
+                <ng-template #extraTemplate>
+                    <input nz-input [(ngModel)]="unitPrice" (keyup)="validatNumber($event?.target)" nzMin="0"
+                        (ngModelChange)="priceChange($event)" />
+                </ng-template>
+
+                <nz-table #nzTable2 [nzData]="tableData" [nzShowPagination]="false" nzSize="small" nzBordered>
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>阶段</th>
+                            <th>类别</th>
+                            <th>模块</th>
+                            <th>描述</th>
+                            <th>工时</th>
+                            <th>价格/元</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngFor="let list of tableData; index as i;">
+                        <!-- "let data of list.children; index as k;" -->
+                        <ng-container *ngFor="let data of list.children; index as k;">
+
+                            <tr *ngFor="let item of data.children; index as j;">
+                                <ng-container *ngIf="showType">
+                                    <td [attr.rowspan]="this.getStatusRow(list.children)" *ngIf=' k===0 && j ===0'>{{
+                                        list.order }}</td>
+                                    <td [attr.rowspan]="this.getStatusRow(list.children)" *ngIf=' k===0 && j ===0'>
+                                        <input nz-input tyle="text" [(ngModel)]="list.statusName" (ngModelChange)="log()" />
+                                        <button class='delete_btn' (click)="delete(i, tableData)" nz-button nzType="default"><i
+                                                nz-icon type="delete" theme="outline"></i></button>
+                                    </td>
+                                    <td [attr.rowspan]=" showType ? data.children.length + 1 : data.children.length"
+                                        *ngIf='j===0'>
+                                        <input nz-input tyle="text" [(ngModel)]="data.typeName" (ngModelChange)="log()" />
+                                        <button nz-button class='delete_btn' (click)="delete(k, list.children)" nzType="default"><i
+                                                nz-icon type="delete" theme="outline"></i></button>
+                                    </td>
+                                    <td>
+                                        <input nz-input tyle="text" [(ngModel)]="item.moduleName" (ngModelChange)="log()" />
+                                        <button nz-button class='delete_btn' (click)="delete(j, data.children)" nzType="default"><i
+                                                nz-icon type="delete" theme="outline"></i></button>
+                                    </td>
+                                    <td><textarea rows="4" nz-input [(ngModel)]="item.describe" (ngModelChange)="log()"></textarea></td>
+                                    <td>
+                                        <input nz-input [(ngModel)]="item.workTime" min="0" (keyup)="validatNumber($event?.target)"
+                                            (ngModelChange)="priceAndLog($event, item)" />
+                                    </td>
+                                    <td><input disabled nz-input [(ngModel)]="item.price" type="text" /></td>
+
+                                </ng-container>
+                                <ng-container *ngIf="!showType">
+
+                                    <td [attr.rowspan]="this.getStatusRow(list.children)" *ngIf=' k===0 && j ===0'>
+                                        {{ list.order }}</td>
+                                    <td [attr.rowspan]="this.getStatusRow(list.children)" *ngIf=' k===0 && j ===0'>
+                                        {{list.statusName}}
+                                    </td>
+                                    <td [attr.rowspan]=" showType ? data.children.length + 1 : data.children.length"
+                                        *ngIf='j===0'>
+                                        {{ data.typeName }}
+                                    </td>
+                                    <td>{{ item.moduleName }} </td>
+                                    <td>{{ item.describe }}</td>
+                                    <td> {{ item.workTime }}</td>
+                                    <td>{{ item.price ? item.price.toFixed(2) : 0.00 }}</td>
+
+                                </ng-container>
+                            </tr>
+
+
+                            <tr *ngIf="showType">
+                                <td [attr.colspan]="4">
+                                    <button nz-button nzType="default" (click)="add(data.children, 3)"><i nz-icon type="plus"></i>添加模块</button>
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <tr *ngIf="showType">
+                            <td [attr.colspan]="5">
+                                <button nz-button nzType="default" (click)="add(list.children, 2)"><i nz-icon type="plus"></i>添加类别</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tr *ngIf="showType">
+                        <td></td>
+                        <td [attr.colspan]="6">
+                            <button nz-button nzType="default" (click)="add(tableData, 1)"><i nz-icon type="plus"></i>添加阶段</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td [attr.colspan]="6">
+                            <div style="text-align: right">总计</div>
+                        </td>
+                        <td>{{ sumPrice.toFixed(2) }}</td>
+                    </tr>
+                </nz-table>
+            </nz-card>
+        </nz-card>
+    </nz-content>
+    <nz-footer>Footer</nz-footer>
+</nz-layout>
